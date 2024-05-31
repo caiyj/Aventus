@@ -2,12 +2,19 @@ package com.alibaba.aventus.test.extension;
 
 import com.alibaba.aventus.extension.Extension;
 import com.alibaba.aventus.extension.ExtensionParser;
+import com.alibaba.aventus.extension.reducer.Reducers;
+import com.alibaba.aventus.extension.spring.ExtensionSpringBean;
+import com.alibaba.aventus.test.extension.domain.OrderCreateParam;
+import com.alibaba.aventus.test.extension.spi.OrderCreateSpi;
 import com.alibaba.aventus.test.extension.spi.SuperService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -36,6 +43,39 @@ public class ExtensionTester {
         System.out.println(result);
 
         Extension.clear();
+    }
+
+    @Resource
+    private OrderCreateSpi orderCreateSpi;
+
+    @Test
+    public void test() throws Exception {
+
+        // 业务身份解析
+        Extension.parse(DemoExtensionParser.class, new String[]{"base"});
+
+
+        OrderCreateParam param = new OrderCreateParam();
+
+        // 扩展点调用
+        // boolean isUseRedPacket = Extension.execute(OrderCreateSpi.class, spi -> spi.isUseRedPacked(param));
+        boolean isUseRedPacket = orderCreateSpi.isUseRedPacked(param);
+        System.out.println(isUseRedPacket);
+
+        // List<Map<String, Object>> attributes = Extension.execute(OrderCreateSpi.class, spi -> spi.getCustomOrderAttributes(param), Reducers.collect());
+        Map<String, Object> attributes = orderCreateSpi.getCustomOrderAttributes(param);
+        System.out.println(attributes);
+
+        // 上下文清理
+        Extension.clear();
+    }
+
+    @Bean
+    public ExtensionSpringBean<OrderCreateSpi> orderCreateSpi() {
+        ExtensionSpringBean<OrderCreateSpi> springBean = new ExtensionSpringBean<>();
+        springBean.setExtension(OrderCreateSpi.class);
+        springBean.setReducer(Reducers.firstOf());
+        return springBean;
     }
 
     public void main() throws Exception {

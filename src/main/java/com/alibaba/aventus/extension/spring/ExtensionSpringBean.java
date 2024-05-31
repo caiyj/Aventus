@@ -17,7 +17,7 @@ import org.springframework.beans.factory.FactoryBean;
 public class ExtensionSpringBean<SPI> implements FactoryBean<SPI> {
 
     @Setter
-    private Class<SPI> spi;
+    private Class<SPI> extension;
 
     @Setter
     private Reducer<?, ?> reducer;
@@ -27,15 +27,15 @@ public class ExtensionSpringBean<SPI> implements FactoryBean<SPI> {
 
     @Override
     public SPI getObject() {
-        Preconditions.checkState(spi != null && reducer != null && reducer.isSameType());
-        SPI proxy = ProxyFactory.newProxy(ExtensionParser.BASE_EXTENSION_GROUP, spi, reducer);
-        log.info("Register spi:[{}] reducer:[{}] spring-proxy-bean:[{}] into spring context.", spi, reducer, proxy);
+        Preconditions.checkState(extension != null && reducer != null && reducer.isSameType());
+        SPI proxy = ProxyFactory.newProxy(ExtensionParser.BASE_EXTENSION_GROUP, extension, reducer);
+        log.info("Register spi:[{}] reducer:[{}] spring-proxy-bean:[{}] into spring context.", extension, reducer, proxy);
         return proxy;
     }
 
     @Override
     public Class<SPI> getObjectType() {
-        return spi;
+        return extension;
     }
 
     @Override

@@ -31,4 +31,13 @@
         </Business>
     </Extension>
 
+    <Extension class="com.alibaba.aventus.test.extension.spi.OrderCreateSpi" base="baseOrderCreateSpiImpl" desc="下单扩展能力">
+        <Business code="normal" type="bean" desc="普通电商交易">
+            <bean name="normalOrderCreateSpiImpl"/>
+        </Business>
+        <Business code="o2c" type="bean" desc="O2O交易">
+            <bean name="o2OOrderCreateSpiImpl"/>
+        </Business>
+    </Extension>
+
 </Extensions>
