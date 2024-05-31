@@ -228,21 +228,18 @@ public class DemoExtensionParser implements ExtensionParser<String[]> {
 }
 ```
 
-### 结果回收机制(Reducer)
+### 执行结果回收(Reducer)
 
 ### 远程扩展调用(Dubbo/Hsf)
+> 仅支持xml方式配置(扩展点声明与实现可以与注解方式配置)
 
 ### 上下文机制(ExtensionContext)
 
 ### 路由机制(ExtensionRouter)
 
-### 子调用机制(SubGroup)
-
 ### 插件机制(ExtensionPlugin)
 
-
-> 仅支持xml方式配置
-
+### 二次路由调用(SubGroup)
 
 ### 实现原理
 
@@ -253,7 +250,6 @@ public class DemoExtensionParser implements ExtensionParser<String[]> {
 ![](https://img.alicdn.com/imgextra/i4/O1CN01tXTb2K1CZYZL8dyWP_!!6000000000095-2-tps-1362-1482.png)
 
 ### 使用方式
-
 ![](https://img.alicdn.com/imgextra/i2/O1CN01w67nnS1zErqos8eRN_!!6000000006683-2-tps-2088-920.png)
 
 ---
