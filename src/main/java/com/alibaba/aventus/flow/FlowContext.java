@@ -1,5 +1,7 @@
 package com.alibaba.aventus.flow;
 
+import lombok.Getter;
+
 /**
  * @author jifang.zjf@alibaba-inc.com (FeiQing)
  * @version 1.0
@@ -7,5 +9,6 @@ package com.alibaba.aventus.flow;
  */
 public class FlowContext {
 
-    protected String name;
+    @Getter
+    protected String flowName;
 }

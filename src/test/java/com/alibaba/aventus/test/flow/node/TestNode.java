@@ -1,4 +1,4 @@
-package com.alibaba.aventus.test.flow;
+package com.alibaba.aventus.test.flow.node;
 
 import com.alibaba.aventus.flow.FlowContext;
 import com.alibaba.aventus.flow.FlowNode;

@@ -2,10 +2,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/aop
-        http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
     <context:component-scan base-package="com.alibaba.aventus.test.extension.spi.impl"/>
 
@@ -33,5 +34,17 @@
             <aop:around method="around" pointcut-ref="pl"/>
         </aop:aspect>
     </aop:config>
+
+
+    <bean id="test-flow" class="com.alibaba.aventus.flow.Flow">
+        <property name="name" value="test-flow"/>
+        <property name="nodes">
+            <util:list>
+                <bean class="com.alibaba.aventus.test.flow.node.TestNode"/>
+                <bean class="com.alibaba.aventus.test.flow.node.TestNode"/>
+            </util:list>
+        </property>
+
+    </bean>
 
 </beans>
