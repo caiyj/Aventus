@@ -36,15 +36,20 @@
     </aop:config>
 
 
-    <bean id="test-flow" class="com.alibaba.aventus.flow.Flow">
-        <property name="name" value="test-flow"/>
-        <property name="nodes">
+    <bean id="ORDER-CREATE-FLOW" class="com.alibaba.aventus.flow.Flow">
+        <constructor-arg name="name" value="ORDER-CREATE"/>
+        <constructor-arg name="nodes">
             <util:list>
-                <bean class="com.alibaba.aventus.test.flow.node.TestNode"/>
-                <bean class="com.alibaba.aventus.test.flow.node.TestNode"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode1"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode2"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode2"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode2"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode2"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode2"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode2"/>
+                <bean class="com.alibaba.aventus.test.flow.node.OrderCreateNode3"/>
             </util:list>
-        </property>
-
+        </constructor-arg>
     </bean>
 
 </beans>

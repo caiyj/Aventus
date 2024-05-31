@@ -8,34 +8,41 @@ import static com.alibaba.aventus.logging.AventusLogging.flowLogger;
  * @version 1.0
  * @since 2024/4/10 15:47.
  */
-public abstract class FlowNode<T extends FlowContext, R> {
+@SuppressWarnings({"rawtypes", "unchecked"})
+public abstract class FlowNode<Context, Output> {
 
-    protected abstract R execute(T context) throws Throwable;
+    protected String name;
 
-    protected String desc(T context) {
+    protected abstract Output execute(Context context) throws Throwable;
+
+    protected Flow.Meta getMeta() {
+        return metas.get().get(name);
+    }
+
+    protected String desc(Context context) {
         return this.getClass().getName();
     }
 
-    protected final R next(T context) throws Throwable {
-        Flow.Meta meta = metas.get().get(context.flowName);
+    protected final Output next() throws Throwable {
+        Flow.Meta meta = metas.get().get(name);
         // 已经到达终点
         if (!(++meta.idx < meta.nodes.length)) {
-            throw new IllegalStateException("[FLOW] has already reach end !");
+            throw new IllegalStateException("[FLOW] '" + name + "' has already reach end !");
         }
 
         FlowNode node = meta.nodes[meta.idx];
-        String desc = String.format("%s[%s/%s]('%s')", meta.name, meta.idx + 1, meta.nodes.length, node.desc(context));
+        String desc = String.format("'%s:%d:%s'", name, meta.idx, node.desc(meta.context));
 
         try {
             meta.setAttribute(desc, System.currentTimeMillis());
-            return (R) node.execute(context);
+            return (Output) node.execute(meta.context);
         } catch (Throwable t) {
-            flowLogger.error("[FLOW:{}] {} occur exception.", desc, t);
+            flowLogger.error("[FLOW] {} throw exception.", desc, t);
             throw t;
         } finally {
             long total = System.currentTimeMillis() - (long) meta.removeAttribute(desc);
             if (flowLogger.isTraceEnabled()) {
-                flowLogger.trace("[FLOW:{}] {} cost '{}', total '{}'.", desc, total - meta.cost, total);
+                flowLogger.trace("[FLOW] {} cost {}/{}.", desc, total - meta.cost, total);
             }
             meta.cost = total;
         }

@@ -1,7 +1,6 @@
 package com.alibaba.aventus.flow;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,22 +11,28 @@ import java.util.Map;
  * @since 2024/4/10 16:01.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class Flow<T extends FlowContext, R> {
+public class Flow<Context, Output> {
 
     protected static final ThreadLocal<Map<String, Meta>> metas = ThreadLocal.withInitial(HashMap::new);
 
     @Getter
-    @Setter
-    private String name;
+    private final String name;
 
-    @Setter
-    private FlowNode[] nodes;
+    private final FlowNode[] nodes;
 
-    public R execute(T context) throws Throwable {
-        context.flowName = name;
-        metas.get().put(name, new Meta(name, nodes));
+    public Flow(String name, FlowNode[] nodes) {
+        this.name = name;
+        this.nodes = nodes;
+
+        for (FlowNode node : this.nodes) {
+            node.name = name;
+        }
+    }
+
+    public Output execute(Context context) throws Throwable {
+        metas.get().put(name, new Meta(nodes, context));
         try {
-            return (R) nodes[0].next(context);
+            return (Output) nodes[0].next();
         } finally {
             metas.get().remove(name);
         }
@@ -39,9 +44,9 @@ public class Flow<T extends FlowContext, R> {
 
     protected static class Meta {
 
-        protected final String name;
-
         protected final FlowNode[] nodes;
+
+        protected final Object context;
 
         protected int idx = -1;
 
@@ -49,9 +54,9 @@ public class Flow<T extends FlowContext, R> {
 
         private Map<String, Object> attributes;
 
-        public Meta(String name, FlowNode[] nodes) {
-            this.name = name;
+        public Meta(FlowNode[] nodes, Object input) {
             this.nodes = nodes;
+            this.context = input;
         }
 
         public Map<String, Object> getAttributes() {
