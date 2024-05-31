@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+
+    <Properties>
+        <Property name="logPath" value="${sys:user.home}/logs/aventus"/>
+        <Property name="logFormat" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%X{EAGLEEYE_TRACE_ID}] %-5level %logger{36} - %msg%n"/>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="EXTENSION_LOG_FILE" fileName="${logPath}/extension.log" filePattern="${logPath}/extension.log.%d{yyyy-MM-dd}.%i">
+            <PatternLayout>
+                <Pattern>${logFormat}</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <Async name="ASYNC_EXTENSION" bufferSize="1024" blocking="false">
+            <AppenderRef ref="EXTENSION_LOG_FILE"/>
+        </Async>
+
+        <RollingFile name="FLOW_LOG_FILE" fileName="${logPath}/flow.log" filePattern="${logPath}/flow.log.%d{yyyy-MM-dd}.%i">
+            <PatternLayout>
+                <Pattern>${logFormat}</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <Async name="ASYNC_FLOW" bufferSize="1024" blocking="false">
+            <AppenderRef ref="FLOW_LOG_FILE"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="extension" level="info" additivity="false">
+            <AppenderRef ref="ASYNC_EXTENSION"/>
+        </Logger>
+
+        <Logger name="flow" level="trace" additivity="false">
+            <AppenderRef ref="ASYNC_FLOW"/>
+        </Logger>
+    </Loggers>
+</Configuration>

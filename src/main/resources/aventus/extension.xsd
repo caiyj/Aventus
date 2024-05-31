@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns="https://www.alibaba.com/aventus/extension"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="https://www.alibaba.com/aventus/extension"
+            elementFormDefault="qualified">
+
+    <xsd:element name="Extensions">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="Extension">
+        <xsd:annotation>
+            <xsd:documentation>扩展SPI定义(等同于Java接口)</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="Business" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attributeGroup ref="extensionAttrs"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:attributeGroup name="extensionAttrs">
+        <xsd:attribute name="class" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:documentation>扩展SPI的Java接口全限定名</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="base" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:documentation>SPI默认实现: 必填、值为spring bean name(当基于业务身份找不到具体路由时, 会自动调用默认实现)</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="proxy" type="xsd:string" use="optional" default="false">
+            <xsd:annotation>
+                <xsd:documentation>是否注册SPI的proxy到spring context中: 选填、可以使用@Resource/@Autowired注解引用该SPI实现</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="desc" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation>SPI描述</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:attributeGroup>
+
+    <xsd:element name="Business">
+        <xsd:annotation>
+            <xsd:documentation>业务定义(一个Business标签代表1到n个业务实现)</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:element ref="bean"/>
+                <xsd:element ref="hsf"/>
+            </xsd:choice>
+            <xsd:attributeGroup ref="businessAttrs"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:attributeGroup name="businessAttrs">
+        <xsd:attribute name="code" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:documentation>业务身份定义(支持','分割定义多重业务身份)
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="type" type="Type" use="required">
+            <xsd:annotation>
+                <xsd:documentation>业务实现类型定义: 目前仅支持bean、hsf两种(推荐使用hsf, bean仅适用于需要极致性能或者本地事务的场景)
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="priority" type="xsd:long" default="0">
+            <xsd:annotation>
+                <xsd:documentation>业务优先级定义:越小优先级越高(相同业务身份的不同实现的排序规则|调用顺序)</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="desc" type="xsd:string">
+            <xsd:annotation>
+                <xsd:documentation>业务身份描述</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:attributeGroup>
+
+    <xsd:simpleType name="Type">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="bean"/>
+            <xsd:enumeration value="hsf"/>
+            <xsd:enumeration value="dubbo(*暂不支持*)"/>
+            <xsd:enumeration value="http(*暂不支持*)"/>
+            <xsd:enumeration value="script:spring(*暂不支持*)"/>
+            <xsd:enumeration value="script:java(*暂不支持*)"/>
+            <xsd:enumeration value="script:groovy(*暂不支持*)"/>
+            <xsd:enumeration value="script:python(*暂不支持*)"/>
+            <xsd:enumeration value="script:javascript(*暂不支持*)"/>
+            <xsd:enumeration value="script:lua(*暂不支持*)"/>
+            <xsd:enumeration value="script:sql(*暂不支持*)"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:element name="bean">
+        <xsd:annotation>
+            <xsd:documentation>spring bean实现定义</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:attribute name="name" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>spring bean name</xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="lazy" type="xsd:boolean" default="false">
+                <xsd:annotation>
+                    <xsd:documentation>懒加载</xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="hsf">
+        <xsd:annotation>
+            <xsd:documentation>hsf实现定义</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:attribute name="service" type="xsd:string" use="required"/>
+            <xsd:attribute name="version" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>HSF服务版本定义: 必填: 由于同一个SPI不同业务会有不同的实现, 但此时暴露的serviceName都是一样, 因此我们强制使用版本来进行区分.
+                        我们会在框架层面进行强制校验:此处所定义的服务版本<p color="red">一定</p>是以上面所定义的业务身份中的<b>一个</b>作为后缀(如:
+                        '1.0.0.yhb'、'1.0.0.grey.recycle'), 否则会在解析阶段报错
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="group" type="xsd:string" default="HSF"/>
+            <xsd:attribute name="timeout" type="xsd:long">
+                <xsd:annotation>
+                    <xsd:documentation>clientTimeOut时间</xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="lazy" type="xsd:boolean" default="false">
+                <xsd:annotation>
+                    <xsd:documentation>是否启用懒加载(会被全局参数屏蔽)</xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!--    <xsd:element name="Router">-->
+    <!--        <xsd:annotation>-->
+    <!--            <xsd:documentation>自定义路由定义</xsd:documentation>-->
+    <!--        </xsd:annotation>-->
+    <!--        <xsd:complexType>-->
+    <!--            <xsd:attributeGroup ref="routerAttrs"/>-->
+    <!--        </xsd:complexType>-->
+    <!--    </xsd:element>-->
+
+    <!--    <xsd:attributeGroup name="routerAttrs">-->
+    <!--        <xsd:attribute name="code" type="xsd:string" use="required">-->
+    <!--            <xsd:annotation>-->
+    <!--                <xsd:documentation>业务身份定义, 目前支持','分割支持多重业务身份, 对于非BASE域的id定义, 使用模式匹配方式进行顺序匹配, 语法参考:-->
+    <!--                    https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html-->
+    <!--                </xsd:documentation>-->
+    <!--            </xsd:annotation>-->
+    <!--        </xsd:attribute>-->
+    <!--        <xsd:attribute name="type" type="xsd:string" use="required">-->
+    <!--            <xsd:annotation>-->
+    <!--                <xsd:documentation>业务身份的具体实现类型描述, 目前仅支持bean、hsf两种: 推荐使用hsf, bean仅适用于需要极致性能或者本地事务的场景-->
+    <!--                </xsd:documentation>-->
+    <!--            </xsd:annotation>-->
+    <!--        </xsd:attribute>-->
+    <!--        <xsd:attribute name="method" type="xsd:string" use="required">-->
+    <!--            <xsd:annotation>-->
+    <!--                <xsd:documentation>业务身份的具体实现类型描述, 目前仅支持bean、hsf两种: 推荐使用hsf, bean仅适用于需要极致性能或者本地事务的场景-->
+    <!--                </xsd:documentation>-->
+    <!--            </xsd:annotation>-->
+    <!--        </xsd:attribute>-->
+    <!--        <xsd:attribute name="priority" type="xsd:long" default="0">-->
+    <!--            <xsd:annotation>-->
+    <!--                <xsd:documentation>相同业务身份的不同实现的排序规则(调用顺序): 越小越靠前</xsd:documentation>-->
+    <!--            </xsd:annotation>-->
+    <!--        </xsd:attribute>-->
+    <!--        <xsd:attribute name="desc" type="xsd:string">-->
+    <!--            <xsd:annotation>-->
+    <!--                <xsd:documentation>业务身份描述, 如: 验货宝、闲鱼租赁、图文鉴定、回收帮卖</xsd:documentation>-->
+    <!--            </xsd:annotation>-->
+    <!--        </xsd:attribute>-->
+    <!--    </xsd:attributeGroup>-->
+</xsd:schema>

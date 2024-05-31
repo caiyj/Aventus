@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="false" packagingData="true">
+
+    <property name="logPath" value="${user.home}/logs/aventus"/>
+    <property name="logFormat" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%X{EAGLEEYE_TRACE_ID}] %-5level %logger{36} - %msg%n"/>
+
+    <appender name="EXTENSION_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logPath}/extension.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${logPath}/extension.log.%i</fileNamePattern>
+            <maxIndex>7</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>${logFormat}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC-EXTENSION" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="EXTENSION_LOG_FILE"/>
+    </appender>
+
+    <logger name="extension" level="info" additivity="false">
+        <appender-ref ref="ASYNC-EXTENSION"/>
+    </logger>
+
+    <appender name="FLOW_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logPath}/flow.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${logPath}/flow.log.%i</fileNamePattern>
+            <maxIndex>7</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>${logFormat}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC-FLOW" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="FLOW_LOG_FILE"/>
+    </appender>
+
+    <logger name="flow" level="trace" additivity="false">
+        <appender-ref ref="ASYNC-FLOW"/>
+    </logger>
+</configuration>
